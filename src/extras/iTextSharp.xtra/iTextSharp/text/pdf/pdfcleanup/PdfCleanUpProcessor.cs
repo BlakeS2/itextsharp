@@ -273,7 +273,7 @@ namespace iTextSharp.xtra.iTextSharp.text.pdf.pdfcleanup {
             List<Rectangle> markedRectangles = new List<Rectangle>();
             PdfArray quadPoints = annotDict.GetAsArray(PdfName.QUADPOINTS);
 
-            if (quadPoints.Size != 0) {
+            if (quadPoints != null && quadPoints.Size != 0){
                 markedRectangles.AddRange(TranslateQuadPointsToRectangles(quadPoints));
             } else {
                 PdfArray annotRect = annotDict.GetAsArray(PdfName.RECT);

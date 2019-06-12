@@ -265,30 +265,83 @@ namespace iTextSharp.xtra.iTextSharp.text.pdf.pdfcleanup {
             return filter.GetCoveredAreas(renderInfo);
         }
 
-        private byte[] ProcessImage(byte[] imageBytes, IList<Rectangle> areasToBeCleaned) {
-            if (areasToBeCleaned.Count == 0) {
+        //private byte[] ProcessImage(byte[] imageBytes, IList<Rectangle> areasToBeCleaned) {
+        //    if (areasToBeCleaned.Count == 0) {
+        //        return imageBytes;
+        //    }
+
+        //    using (Stream imageStream = new MemoryStream(imageBytes)) {
+        //        SharpImage image = SharpImage.FromStream(imageStream);
+        //        CleanImage(image, areasToBeCleaned);
+
+        //        using (MemoryStream outStream = new MemoryStream()) {
+        //            if (Equals(image.RawFormat, ImageFormat.Tiff)) {
+        //                EncoderParameters encParams = new EncoderParameters(1);
+        //                encParams.Param[0] = new EncoderParameter(Encoder.Compression, (long) EncoderValue.CompressionLZW);
+        //                image.Save(outStream, GetEncoderInfo(image.RawFormat), encParams);
+        //            }
+        //            else if (Equals(image.RawFormat, ImageFormat.Jpeg)) {
+        //                EncoderParameters encParams = new EncoderParameters(1);
+        //                encParams.Param[0] = new EncoderParameter(Encoder.Quality, 100L);
+        //                image.Save(outStream, GetEncoderInfo(image.RawFormat), encParams);
+        //            }
+        //            else {
+        //                image.Save(outStream, image.RawFormat);
+        //            }
+
+        //            return outStream.ToArray();
+        //        }
+        //    }
+        //}
+
+        private byte[] ProcessImage(byte[] imageBytes, IList<Rectangle> areasToBeCleaned)
+        {
+            if (areasToBeCleaned.Count == 0)
+            {
                 return imageBytes;
             }
 
-            using (Stream imageStream = new MemoryStream(imageBytes)) {
+            using (Stream imageStream = new MemoryStream(imageBytes))
+            {
                 SharpImage image = SharpImage.FromStream(imageStream);
+
+                //checking for indexed pixel formats
+                var format = image.PixelFormat.ToString();
+                var subStr = "Indexed";
+                MemoryStream convertStream = new MemoryStream();
+
+
+                if (format.Contains(subStr))
+                {
+
+                    image.Save(convertStream, ImageFormat.Jpeg);
+                    image = SharpImage.FromStream(convertStream);
+
+                }
+
+
                 CleanImage(image, areasToBeCleaned);
 
-                using (MemoryStream outStream = new MemoryStream()) {
-                    if (Equals(image.RawFormat, ImageFormat.Tiff)) {
+                using (MemoryStream outStream = new MemoryStream())
+                {
+                    if (Equals(image.RawFormat, ImageFormat.Tiff))
+                    {
                         EncoderParameters encParams = new EncoderParameters(1);
-                        encParams.Param[0] = new EncoderParameter(Encoder.Compression, (long) EncoderValue.CompressionLZW);
+                        encParams.Param[0] = new EncoderParameter(Encoder.Compression, (long)EncoderValue.CompressionLZW);
                         image.Save(outStream, GetEncoderInfo(image.RawFormat), encParams);
                     }
-                    else if (Equals(image.RawFormat, ImageFormat.Jpeg)) {
+                    else if (Equals(image.RawFormat, ImageFormat.Jpeg))
+                    {
                         EncoderParameters encParams = new EncoderParameters(1);
                         encParams.Param[0] = new EncoderParameter(Encoder.Quality, 100L);
                         image.Save(outStream, GetEncoderInfo(image.RawFormat), encParams);
                     }
-                    else {
+                    else
+                    {
                         image.Save(outStream, image.RawFormat);
                     }
 
+                    convertStream.Close();
                     return outStream.ToArray();
                 }
             }
